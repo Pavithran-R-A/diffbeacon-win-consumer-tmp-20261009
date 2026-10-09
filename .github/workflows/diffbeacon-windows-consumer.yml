@@ -21,8 +21,23 @@ jobs:
       - name: Run the pinned published Action from another repository
         uses: Pavithran-R-A/DiffBeacon@a89d8bb7d048bfd4e016e494428d04f060e82112 # v0.1.1
 
-      - name: Echo the Job Summary the Action produced (evidence into the run log)
+      - name: Prepare a readable capture directory
+        shell: pwsh
+        run: New-Item -ItemType Directory -Force -Path (Join-Path $env:GITHUB_WORKSPACE 'capture') | Out-Null
+
+      - name: Re-run the same pinned Action with the summary path redirected into the workspace
+        uses: Pavithran-R-A/DiffBeacon@a89d8bb7d048bfd4e016e494428d04f060e82112 # v0.1.1
+        env:
+          GITHUB_STEP_SUMMARY: ${{ github.workspace }}/capture/diffbeacon-report.md
+
+      - name: Print the captured Action report verbatim into the retained run log
         shell: pwsh
         run: |
-          Write-Output "GITHUB_STEP_SUMMARY=$env:GITHUB_STEP_SUMMARY"
-          Get-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Raw
+          $f = Join-Path $env:GITHUB_WORKSPACE 'capture/diffbeacon-report.md'
+          Write-Output "capture_path=$f"
+          Write-Output "exists=$(Test-Path -LiteralPath $f)"
+          if (Test-Path -LiteralPath $f) {
+            Write-Output '=====DIFFBEACON-REPORT-BEGIN====='
+            Get-Content -LiteralPath $f -Raw
+            Write-Output '=====DIFFBEACON-REPORT-END====='
+          }
