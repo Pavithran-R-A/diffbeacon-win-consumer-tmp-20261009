@@ -20,3 +20,9 @@ jobs:
 
       - name: Run the pinned published Action from another repository
         uses: Pavithran-R-A/DiffBeacon@a89d8bb7d048bfd4e016e494428d04f060e82112 # v0.1.1
+
+      - name: Echo the Job Summary the Action produced (evidence into the run log)
+        shell: pwsh
+        run: |
+          Write-Output "GITHUB_STEP_SUMMARY=$env:GITHUB_STEP_SUMMARY"
+          Get-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Raw
