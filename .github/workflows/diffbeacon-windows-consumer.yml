@@ -41,3 +41,23 @@ jobs:
             Get-Content -LiteralPath $f -Raw
             Write-Output '=====DIFFBEACON-REPORT-END====='
           }
+
+      - name: Inspect the runner temp directory for summary files and print any report body found
+        shell: pwsh
+        run: |
+          Write-Output "RUNNER_TEMP=$env:RUNNER_TEMP"
+          Write-Output "GITHUB_STEP_SUMMARY=$env:GITHUB_STEP_SUMMARY"
+          $files = @(Get-ChildItem -Path $env:RUNNER_TEMP -Recurse -File -ErrorAction SilentlyContinue)
+          Write-Output "temp_file_count=$($files.Count)"
+          foreach ($x in $files) { Write-Output "FILE $($x.FullName) size=$($x.Length)" }
+          $hits = @($files | Where-Object { $_.Length -lt 200000 })
+          foreach ($h in $hits) {
+            $c = ''
+            try { $c = Get-Content -LiteralPath $h.FullName -Raw -ErrorAction Stop } catch { continue }
+            if ($c -match 'DiffBeacon') {
+              Write-Output "=====BODY-BEGIN $($h.Name)====="
+              Write-Output $c
+              Write-Output "=====BODY-END $($h.Name)====="
+            }
+          }
+          Write-Output 'inspect-complete'
