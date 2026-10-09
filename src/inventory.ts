@@ -10,3 +10,17 @@ export function totalQuantity(items: Item[]): number {
   }
   return total;
 }
+
+export function describeItem(item: Item): string {
+  try {
+    if (item.quantity > 0) {
+      if (item.id.length > 8) {
+        return `${item.id.slice(0, 8)} x${item.quantity}`;
+      }
+      return `${item.id} x${item.quantity}`;
+    }
+    return `${item.id} out of stock`;
+  } catch {
+    return '';
+  }
+}
